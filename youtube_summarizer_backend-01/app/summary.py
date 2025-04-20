@@ -49,6 +49,7 @@ def generate_summary(
     try:
         # Call your summarizer function here
         # url = validate_url(video_request.url)
+        print(f'Received request: {video_request.url}')
         transcript = get_youtube_transcript(youtube_url=video_request.url)
         summary = summarize_transcript(transcript=transcript, max_tokens=video_request.max_length)["summary"]
 
@@ -57,6 +58,7 @@ def generate_summary(
             word_count=100
         )
     except Exception as e:
+        print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error summarizing video")
 
 

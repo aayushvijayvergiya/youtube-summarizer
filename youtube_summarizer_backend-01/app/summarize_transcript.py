@@ -199,7 +199,7 @@ def summarize_transcript(
         Dict[str, Any]: Dictionary with summary and metadata
     """
 
-    print('Transcript:', transcript)
+    print('Transcript received')
 
     summarizer = create_summarizer(
         provider=provider,
@@ -208,9 +208,9 @@ def summarize_transcript(
         max_tokens=max_tokens
     )
 
-    summaryDict = summarizer(transcript, format_type)
+    summary_dict = summarizer(transcript, format_type)
 
-    print('Summary:', summaryDict['summary'])
-    print('Word Count:', summaryDict['word_count'])
+    print('Summary Received')
+    print('Word Count:', summary_dict['word_count'])
 
-    return summaryDict
+    return summary_dict
