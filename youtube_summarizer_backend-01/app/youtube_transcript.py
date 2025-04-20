@@ -1,4 +1,5 @@
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 from youtube_transcript_api.formatters import TextFormatter
 from urllib.parse import urlparse, parse_qs
 
@@ -20,8 +21,15 @@ def get_youtube_transcript(youtube_url: str) -> str:
         # Extract video ID from URL
         video_id = extract_video_id(youtube_url)
 
+        ytt_api = YouTubeTranscriptApi(
+            proxy_config=WebshareProxyConfig(
+                proxy_username="aayushwebshare01",
+                proxy_password="3nuecv7s5qhr",
+            )
+        )
+
         # Get available transcripts
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        transcript_list = ytt_api.list(video_id)
 
         # Try to get English transcript
         try:
