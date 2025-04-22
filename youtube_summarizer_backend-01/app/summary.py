@@ -7,6 +7,7 @@ from app.summarize_transcript import summarize_transcript
 
 origins = [
     "http://localhost:3000",
+    "https://youtube-summarizer-livid.vercel.app"
 ]
 
 # Pass middleware to FastAPI

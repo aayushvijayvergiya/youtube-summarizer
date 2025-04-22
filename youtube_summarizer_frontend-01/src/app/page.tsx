@@ -4,6 +4,7 @@ import Head from 'next/head';
 import VideoSummaryForm from '@/components/SummaryForm/SummaryForm';
 import SummaryResult from '@/components/SummaryResult/SummaryResult';
 import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
+import { API_BASE_URL } from '@/constants/api-constants';
 
 interface VideoData {
   url: string;
@@ -24,7 +25,7 @@ export default function Home() {
 
     try {
       // Call to your backend API
-      const response = await fetch('http://localhost:8010/summarize', {
+      const response = await fetch(`${API_BASE_URL}/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
