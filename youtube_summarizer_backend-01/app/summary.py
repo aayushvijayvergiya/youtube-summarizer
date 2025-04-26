@@ -1,28 +1,10 @@
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
 from app.youtube_transcript import get_youtube_transcript
 from app.summarize_transcript import summarize_transcript
 
-origins = [
-    "http://localhost:3000",
-    "https://youtube-summarizer-livid.vercel.app"
-]
-
-# Pass middleware to FastAPI
-app = FastAPI(
-    title="YouTube Summarizer API",
-    description="API for generating video summaries",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 
 # Request/Response Models
@@ -43,7 +25,7 @@ def validate_url(url: str):
     return url
 
 
-@app.post("/summarize", response_model=SummaryResponse)
+@router.post("/summarize", response_model=SummaryResponse)
 def generate_summary(
     video_request: VideoRequest,
 ):

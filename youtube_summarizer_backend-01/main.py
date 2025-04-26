@@ -1,9 +1,39 @@
-# This is a sample Python script.
 import uvicorn
-from app.summary import app
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from app import auth_routes
+from app import summary
+from app.userRepository import models
+from app.database import engine
+
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+models.Base.metadata.create_all(bind=engine)
+
+origins = [
+    "http://localhost:3000",
+    "https://youtube-summarizer-livid.vercel.app"
+]
+
+# Pass middleware to FastAPI
+app = FastAPI(
+    title="YouTube Summarizer API",
+    description="API for generating video summaries",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
+app.include_router(summary.router, prefix="", tags=["summarize"])
 
 
 def print_hi(name):
