@@ -9,7 +9,7 @@ import { setItem } from "@/service/localstorage";
 import { useAuth } from "@/hooks/auth";
 import { API_BASE_URL } from "@/constants/api-constants";
 
-const API_URL = API_BASE_URL || "http://localhost:8010/auth";
+const API_URL = API_BASE_URL || "http://localhost:8010";
 
 interface FormData {
   name: string;
@@ -48,7 +48,7 @@ export default function AuthForm() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       if (isSignup) {
-        await axios.post(`${API_URL}/signup`, {
+        await axios.post(`${API_URL}/auth/signup`, {
           username: data.username,
           email: data.email,
           password: data.password,
@@ -56,7 +56,7 @@ export default function AuthForm() {
         toast.success("Signup successful! Please signin.");
         toggleMode();
       } else {
-        const res = await axios.post(`${API_URL}/signin`, {
+        const res = await axios.post(`${API_URL}/auth/signin`, {
           username: data.username,
           password: data.password,
         });
