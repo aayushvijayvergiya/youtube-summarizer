@@ -7,8 +7,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { setItem } from "@/service/localstorage";
 import { useAuth } from "@/hooks/auth";
+import { API_BASE_URL } from "@/constants/api-constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8010/auth";
+const API_URL = API_BASE_URL || "http://localhost:8010/auth";
 
 interface FormData {
   name: string;
