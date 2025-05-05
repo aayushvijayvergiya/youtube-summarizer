@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth_routes
-from app import summary
+from app.summary_subapp import summary_app
 from app.userRepository import models
 from app.database import engine
 
@@ -33,7 +33,9 @@ app.add_middleware(
 )
 
 app.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
-app.include_router(summary.router, prefix="", tags=["summarize"])
+
+# Mount the sub-application to the main app
+app.mount("/summary", summary_app)
 
 
 def print_hi(name):
