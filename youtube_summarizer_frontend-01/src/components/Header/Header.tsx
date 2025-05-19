@@ -36,6 +36,9 @@ const Header: React.FC = () => {
             <Link href="/" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
               Home
             </Link>
+            <Link href="/summary" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
+              New Summary
+            </Link>
             <Link href="/history" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
               History
             </Link>

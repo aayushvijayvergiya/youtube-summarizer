@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, /* useEffect */ } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { setItem } from "@/service/localstorage";
-import { useAuth } from "@/hooks/auth";
 import { API_BASE_URL } from "@/constants/api-constants";
+import { useAuthContext } from "@/context/AuthContext";
 
 const API_URL = API_BASE_URL || "http://localhost:8010";
 
@@ -23,14 +22,7 @@ export default function AuthForm() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-    const { isAuthenticated, redirectToHome } = useAuth();
-  
-    // Redirect to auth if not authenticated
-    useEffect(() => {
-      if (isAuthenticated) {
-        redirectToHome();
-      }
-    }, [isAuthenticated, redirectToHome]);
+  const { login } = useAuthContext();
 
   const {
     register,
@@ -60,8 +52,8 @@ export default function AuthForm() {
           username: data.username,
           password: data.password,
         });
-        await setItem("token", res.data.access_token);
         toast.success("Signin successful!");
+        await login(res.data.access_token); // Update the context with the token
         // Redirect to dashboard or home page
         router.push("/summary");
       }

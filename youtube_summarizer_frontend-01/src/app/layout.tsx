@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import Header from "@/components/Header/Header";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,10 @@ export default function RootLayout({
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Header />
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+        
         <Toaster position="top-center" />
 
         <footer className="py-6  border-gray-200">

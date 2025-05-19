@@ -1,10 +1,11 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import VideoSummaryForm from "@/components/SummaryForm/SummaryForm";
 import SummaryResult from "@/components/SummaryResult/SummaryResult";
 import LoadingIndicator from "@/components/LoadingIndicator/LoadingIndicator";
-import { API_BASE_URL } from "@/constants/api-constants";
-import { useAuth } from "../../hooks/auth";
+import { useAuthContext } from "@/context/AuthContext";
+import { useSummary } from "@/hooks/useSummary";
 
 interface VideoData {
   url: string;
@@ -18,15 +19,15 @@ export default function Summary() {
   const [error, setError] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<VideoData | null>(null);
 
-  const { isAuthenticated, redirectToAuth } = useAuth();
+  const { state: { authenticating }, isAuthenticated, redirectToAuth } = useAuthContext();
+  const { summarizeVideo, loading } = useSummary();
 
   // Redirect to auth if not authenticated
   useEffect(() => {
-    console.log("isAuthenticated", isAuthenticated);
-    if (!isAuthenticated) {
+    if (authenticating === 'LOADED' && !isAuthenticated()) {
       redirectToAuth();
     }
-  }, [isAuthenticated, redirectToAuth]);
+  }, [authenticating, isAuthenticated, redirectToAuth]);
 
   const handleSubmit = async (
     videoUrl: string,
@@ -38,29 +39,13 @@ export default function Summary() {
 
     try {
       // Call to your backend API
-      const response = await fetch(`${API_BASE_URL}/summarize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: videoUrl,
-          format_type: format || "paragraph",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Failed to summarize video");
-      }
-
-      setSummary(data.summary);
+      const response = await summarizeVideo(videoUrl, format);
+      setSummary(response.summary);
       setVideoData({
         url: videoUrl,
-        title: data.title || "YouTube Video",
-        thumbnail: data.thumbnail || null,
+        title: response.title || "YouTube Video",
       });
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
@@ -69,6 +54,14 @@ export default function Summary() {
     }
   };
 
+  useEffect(() => {
+    if (loading) {
+      setIsLoading(true);
+    }
+  }, [loading]);
+
+  const isAuthenticating = authenticating === "LOADING";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -76,9 +69,9 @@ export default function Summary() {
           Summarize Any YouTube Video
         </h1>
 
-        <VideoSummaryForm onSubmit={handleSubmit} />
+        <VideoSummaryForm onSubmit={handleSubmit} loading={loading}/>
 
-        {isLoading && <LoadingIndicator />}
+        {isLoading && isAuthenticating && <LoadingIndicator />}
 
         {error && (
           <div className="mt-6 p-4 bg-red-50 rounded-md border border-red-200">

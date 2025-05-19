@@ -4,9 +4,10 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 
 interface VideoSummaryFormProps {
   onSubmit: (url: string, format: string) => void;
+  loading?: boolean;
 }
 
-const VideoSummaryForm: React.FC<VideoSummaryFormProps> = ({ onSubmit }) => {
+const VideoSummaryForm: React.FC<VideoSummaryFormProps> = ({ onSubmit, loading }) => {
   const [url, setUrl] = useState<string>('');
   const [format, setFormat] = useState<string>('paragraph');
   const [isValidUrl, setIsValidUrl] = useState<boolean>(true);
@@ -80,7 +81,8 @@ const VideoSummaryForm: React.FC<VideoSummaryFormProps> = ({ onSubmit }) => {
 
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+          disabled={loading}
+          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors "
         >
           Generate Summary
         </button>
