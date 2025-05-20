@@ -2,9 +2,22 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useAuthContext } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const { state: { isAuthenticated }, logout } = useAuthContext();
+  const router = useRouter();
+
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      logout();
+      router.push('/auth');
+    } else {
+      router.push('/auth');
+    }
+  };
 
   return (
     <header className="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md">
@@ -32,16 +45,19 @@ const Header: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
-              Home
-            </Link>
+          <nav className="hidden md:flex space-x-8 items-center">
             <Link href="/summary" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
               New Summary
             </Link>
             <Link href="/history" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
               History
             </Link>
+            <button
+              onClick={handleAuthClick}
+              className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium focus:outline-none cursor-pointer"
+            >
+              {isAuthenticated ? 'Sign Out' : 'Sign In'}
+            </button>
             <Link href="/about" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
               About
             </Link>
@@ -72,13 +88,22 @@ const Header: React.FC = () => {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
-              Home
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
+            <Link href="/summary" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
+              New Summary
             </Link>
             <Link href="/history" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
               History
             </Link>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleAuthClick();
+              }}
+              className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium text-left focus:outline-none"
+            >
+              {isAuthenticated ? 'Sign Out' : 'Sign In'}
+            </button>
             <Link href="/about" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
               About
             </Link>

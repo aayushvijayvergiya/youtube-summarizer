@@ -37,9 +37,11 @@ export default function Dashboard() {
     <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center relative">
       <div className="absolute top-0 left-0 w-full max-w-4xl px-4 py-8">
         <div className="flex flex-col items-start mb-8">
-          <h1 className="text-gray-600 text-3xl font-bold mb-2">
-            Welcome, {user?.username?.toLocaleUpperCase()}!
-          </h1>
+          {isAuthenticated() && (
+            <h1 className="text-gray-600 text-3xl font-bold mb-2">
+              Welcome, {user?.username?.toLocaleUpperCase()}!
+            </h1>
+          )}
           <p className="text-gray-600">{user?.email}</p>
         </div>
       </div>

@@ -65,6 +65,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const token = await getAuthToken();
       if (token) {
         dispatch({ type: "LOGIN", token });
+      } else {
+        dispatch({ type: "LOGOUT" });
       }
     };
     initializeAuth();
