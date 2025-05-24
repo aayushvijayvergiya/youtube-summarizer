@@ -14,13 +14,11 @@ interface VideoData {
 }
 
 export default function Summary() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [summary, setSummary] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<VideoData | null>(null);
 
   const { state: { authenticating }, isAuthenticated, redirectToAuth } = useAuthContext();
-  const { summarizeVideo, loading } = useSummary();
+  const { summarizeVideo, loading: dataLoading, error } = useSummary();
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -33,11 +31,7 @@ export default function Summary() {
     videoUrl: string,
     format: string
   ): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
     setSummary(null);
-
-    try {
       // Call to your backend API
       const response = await summarizeVideo(videoUrl, format);
       setSummary(response.summary);
@@ -45,22 +39,19 @@ export default function Summary() {
         url: videoUrl,
         title: response.title || "YouTube Video",
       });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  useEffect(() => {
-    if (loading) {
-      setIsLoading(true);
-    }
-  }, [loading]);
-
-  const isAuthenticating = authenticating === "LOADING";
+  const isAuthenticating = authenticating === "LOADING" || !isAuthenticated();
+  
+  // Show loading indicator if authenticating
+  // or if the user is not authenticated
+  if (isAuthenticating) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -69,9 +60,9 @@ export default function Summary() {
           Summarize Any YouTube Video
         </h1>
 
-        <VideoSummaryForm onSubmit={handleSubmit} loading={loading}/>
+        <VideoSummaryForm onSubmit={handleSubmit} loading={dataLoading}/>
 
-        {isLoading && isAuthenticating && <LoadingIndicator />}
+        {dataLoading && <LoadingIndicator />}
 
         {error && (
           <div className="mt-6 p-4 bg-red-50 rounded-md border border-red-200">

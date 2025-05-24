@@ -1,9 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
-import { getAuthToken } from "@/utils/auth";
+import { getAuthToken, saveAuthToken } from "@/utils/auth";
 import { setItem } from "@/service/localstorage";
+import { useUser } from "@/hooks/useUser";
 
 enum AuthStatus {
   LOADING = "LOADING",
@@ -11,34 +18,63 @@ enum AuthStatus {
   LOADED = "LOADED",
 }
 
+export interface User {
+  username: string;
+  email: string;
+  token: string;
+}
+
 interface AuthState {
   authenticating: AuthStatus;
   isAuthenticated: boolean;
-  token: string | null;
+  user: User | null;
 }
 
 type AuthAction =
   | { type: "LOADING" }
   | { type: "ERROR" }
-  | { type: "LOGIN"; token: string }
-  | { type: "LOGOUT" };
+  | { type: "LOGIN" }
+  | { type: "LOGOUT" }
+  | { type: "CURRENT_USER"; user: User }
+  | { type: "LOADING_USER" };
 
 const initialState: AuthState = {
   authenticating: AuthStatus.LOADING,
   isAuthenticated: false,
-  token: null,
+  user: null,
 };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case "LOADING":
       return { ...state, authenticating: AuthStatus.LOADING };
+    case "LOADING_USER":
+      return {
+        ...state,
+        authenticating: AuthStatus.LOADING,
+        isAuthenticated: false,
+      };
+    case "CURRENT_USER":
+      return {
+        ...state,
+        user: action.user,
+        authenticating: AuthStatus.LOADED,
+        isAuthenticated: true,
+      };
     case "LOGIN":
-      return { isAuthenticated: true, token: action.token, authenticating: AuthStatus.LOADED };
+      return {
+        ...state,
+        isAuthenticated: true,
+        authenticating: AuthStatus.LOADED,
+      };
     case "ERROR":
       return { ...state, authenticating: AuthStatus.ERROR };
     case "LOGOUT":
-      return { isAuthenticated: false, token: null, authenticating: AuthStatus.LOADED };
+      return {
+        isAuthenticated: false,
+        user: null,
+        authenticating: AuthStatus.LOADED,
+      };
     default:
       return state;
   }
@@ -58,39 +94,61 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const { fetchUser } = useUser();
 
   useEffect(() => {
     dispatch({ type: "LOADING" });
     const initializeAuth = async () => {
-      const token = await getAuthToken();
-      if (token) {
-        dispatch({ type: "LOGIN", token });
-      } else {
-        dispatch({ type: "LOGOUT" });
+      try {
+        const token = await getAuthToken();
+        if (token) {
+          await dispatch({ type: "LOADING_USER" });
+          const userData = await fetchUser(token);
+          await dispatch({ type: "CURRENT_USER", user: userData });
+        } else {
+          await dispatch({ type: "LOGOUT" });
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        dispatch({ type: "ERROR" });
+        redirectToAuth();
       }
     };
     initializeAuth();
   }, []);
 
   const isAuthenticated = () => {
-    return state.isAuthenticated;
-  }
+    return state.authenticating == "LOADED" && state.isAuthenticated;
+  };
 
   const login = async (token: string) => {
-    dispatch({ type: "LOGIN", token });
-    await setItem("authToken", token);
+    await dispatch({ type: "LOGIN" });
+
+    await dispatch({ type: "LOADING_USER" });
+    const userData = await fetchUser(token);
+    await dispatch({ type: "CURRENT_USER", user: userData });
+    await saveAuthToken(token);
   };
 
   const logout = async () => {
     dispatch({ type: "LOGOUT" });
-    await setItem("authToken", '');
+    await setItem("authToken", "");
   };
 
   const redirectToAuth = () => router.push("/auth");
   const redirectToHome = () => router.push("/");
 
   return (
-    <AuthContext.Provider value={{ state, isAuthenticated, login, logout, redirectToAuth, redirectToHome }}>
+    <AuthContext.Provider
+      value={{
+        state,
+        isAuthenticated,
+        login,
+        logout,
+        redirectToAuth,
+        redirectToHome,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,43 +1,14 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { User } from "@/context/AuthContext";
 import Link from "next/link";
 
-import { useUser } from "@/hooks/useUser";
 
-import { useAuthContext } from "@/context/AuthContext";
-
-interface User {
-  username: string;
-  email: string;
-  token: string;
-}
-
-export default function Dashboard() {
-  const { fetchUser } = useUser();
-
-  const {
-    state: { authenticating },
-    isAuthenticated,
-  } = useAuthContext();
-
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (authenticating === "LOADED" && isAuthenticated()) {
-        const userData = await fetchUser();
-        setUser(userData);
-      }
-    };
-    fetchData();
-  }, [authenticating, fetchUser, isAuthenticated]);
+export default function Dashboard({ user} : { user: User | null }) {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center relative">
       <div className="absolute top-0 left-0 w-full max-w-4xl px-4 py-8">
         <div className="flex flex-col items-start mb-8">
-          {isAuthenticated() && (
+          {user && (
             <h1 className="text-gray-600 text-3xl font-bold mb-2">
               Welcome, {user?.username?.toLocaleUpperCase()}!
             </h1>

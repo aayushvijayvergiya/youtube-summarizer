@@ -1,4 +1,4 @@
-import { getItem } from "@/service/localstorage"
+import { getItem, setItem } from "@/service/localstorage"
 
 export const getAuthToken = async (): Promise<string | null> => {
     const token = await getItem<string>("authToken");
@@ -7,3 +7,7 @@ export const getAuthToken = async (): Promise<string | null> => {
     }
     return token;
 }
+
+export const saveAuthToken = async (token: string): Promise<void> => {
+    await setItem("authToken", token);
+};

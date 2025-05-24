@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { API_BASE_URL } from "@/constants/api-constants";
-import { useAuthContext } from "@/context/AuthContext";
+import { getAuthToken } from '@/utils/auth';
 
 interface Summary {
     id: number;
@@ -16,21 +16,28 @@ interface SummarizeResponse {
     [key: string]: unknown;
 }
 
+interface SaveSummaryRequest {
+    summary: string;
+    title: string;
+    url: string;
+}
+
 interface UseSummaryResult {
     summaries: Summary[];
     loading: boolean;
     error: string | null;
     fetchSummaries: () => Promise<void>;
     summarizeVideo: (videoUrl: string, format?: string) => Promise<SummarizeResponse>;
+    saveSummary: (saveSummaryRequest: SaveSummaryRequest) => Promise<void>;
 }
 
 export function useSummary(): UseSummaryResult {
     const [summaries, setSummaries] = useState<Summary[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { state: { token } } = useAuthContext();
 
     const fetchSummaries = useCallback(async () => {
+        const token = await getAuthToken();
         setLoading(true);
         setError(null);
         try {
@@ -54,10 +61,11 @@ export function useSummary(): UseSummaryResult {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
     const summarizeVideo = useCallback(
         async (videoUrl: string, format: string = "paragraph") : Promise<SummarizeResponse> => {
+            const token = await getAuthToken();
             setLoading(true);
             setError(null);
             try {
@@ -88,8 +96,48 @@ export function useSummary(): UseSummaryResult {
                 setLoading(false);
             }
         },
-        [token]
+        []
     );
 
-    return { summaries, loading, error, fetchSummaries, summarizeVideo };
+    const saveSummary = useCallback(
+        async ({ summary, title, url }: SaveSummaryRequest) => {
+            const token = await getAuthToken();
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch(`${API_BASE_URL}/summary/save`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        summary,
+                        title,
+                        url,
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to save summary");
+                }
+                await fetchSummaries();
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Unknown error");
+                }
+            } finally {
+                setLoading(false);
+            }
+        }, [])
+
+    return { 
+        summaries, 
+        loading, 
+        error, 
+        fetchSummaries, 
+        summarizeVideo,
+        saveSummary 
+    };
 }

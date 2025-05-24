@@ -1,21 +1,24 @@
-'use client'
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useAuthContext } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import Link from "next/link";
+import { useAuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const { state: { isAuthenticated }, logout } = useAuthContext();
+  const {
+    state: { isAuthenticated },
+    logout,
+  } = useAuthContext();
   const router = useRouter();
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
       logout();
-      router.push('/auth');
+      router.push("/auth");
     } else {
-      router.push('/auth');
+      router.push("/auth");
     }
   };
 
@@ -26,39 +29,52 @@ const Header: React.FC = () => {
           {/* Logo and App Name */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-8 w-8 text-white mr-2" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-white mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M7 4v16M17 4v16M3 8h18M3 16h18" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 4v16M17 4v16M3 8h18M3 16h18"
                 />
               </svg>
-              <span className="text-white font-bold text-xl">YouTube Summarizer</span>
+              <span className="text-white font-bold text-xl">
+                YouTube Summarizer
+              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8 items-center">
-            <Link href="/summary" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/summary"
+              className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium"
+            >
               New Summary
             </Link>
-            <Link href="/history" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
-              History
-            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/history"
+                className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                History
+              </Link>
+            )}
             <button
               onClick={handleAuthClick}
               className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium focus:outline-none cursor-pointer"
             >
-              {isAuthenticated ? 'Sign Out' : 'Sign In'}
+              {isAuthenticated ? "Sign Out" : "Sign In"}
             </button>
-            <Link href="/about" className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/about"
+              className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium"
+            >
               About
             </Link>
           </nav>
@@ -72,12 +88,34 @@ const Header: React.FC = () => {
             >
               <span className="sr-only">Open main menu</span>
               {isMenuOpen ? (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -89,10 +127,16 @@ const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
-            <Link href="/summary" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/summary"
+              className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium"
+            >
               New Summary
             </Link>
-            <Link href="/history" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/history"
+              className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium"
+            >
               History
             </Link>
             <button
@@ -102,9 +146,12 @@ const Header: React.FC = () => {
               }}
               className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium text-left focus:outline-none"
             >
-              {isAuthenticated ? 'Sign Out' : 'Sign In'}
+              {isAuthenticated ? "Sign Out" : "Sign In"}
             </button>
-            <Link href="/about" className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/about"
+              className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium"
+            >
               About
             </Link>
           </div>

@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useSummary } from "@/hooks/useSummary";
+import { redirect } from "next/navigation";
 
 interface VideoData {
   thumbnail?: string;
@@ -18,12 +20,18 @@ const SummaryResult: React.FC<SummaryResultProps> = ({
   videoData,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
+  const { saveSummary, loading} = useSummary();
 
   const copyToClipboard = (): void => {
     navigator.clipboard.writeText(summary);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleSaveSummary = async (): Promise<void> => {
+    await saveSummary({ summary, title: videoData.title, url: videoData.url });
+    redirect("/history");
+  }
 
   return (
     <div className="mt-8">
@@ -78,6 +86,12 @@ const SummaryResult: React.FC<SummaryResultProps> = ({
               className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {copied ? "Copied!" : "Copy to clipboard"}
+            </button>
+            <button
+              onClick={handleSaveSummary}
+              className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {loading ? "Saving" : "Save to history"}
             </button>
           </div>
         </div>

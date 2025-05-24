@@ -1,36 +1,27 @@
 import { useCallback } from "react";
 import { API_BASE_URL } from "@/constants/api-constants";
-import { useAuthContext } from "@/context/AuthContext";
 
 export const useUser = () => {
-  const { state: { token}, redirectToAuth } = useAuthContext()
-
-  const fetchUser = useCallback(async () => {
+  const fetchUser = useCallback(async (token: string) => {
     if (!token) {
-      redirectToAuth();
-      return null;
+      throw new Error("Token is required to fetch user data.");
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/currentuser`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const response = await fetch(`${API_BASE_URL}/auth/currentuser`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (!response.ok) {
-        if(response.status === 401) {
-          redirectToAuth();
-        }
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized access. Please log in again.");
       }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      redirectToAuth();
     }
-  }, [token, redirectToAuth]);
+
+    const data = await response.json();
+    return data;
+  }, []);
 
   return { fetchUser };
-}
+};
