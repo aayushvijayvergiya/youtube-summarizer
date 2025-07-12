@@ -1,25 +1,12 @@
 import { useCallback } from "react";
 import { API_BASE_URL } from "@/constants/api-constants";
+import { apiService } from "@/service/apiService";
 
 export const useUser = () => {
-  const fetchUser = useCallback(async (token: string) => {
-    if (!token) {
-      throw new Error("Token is required to fetch user data.");
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/currentuser`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Unauthorized access. Please log in again.");
-      }
-    }
-
-    const data = await response.json();
+  const fetchUser = useCallback(async () => {
+    // The apiService will handle adding the token and basic error handling
+    const data = await apiService.get(
+      `${API_BASE_URL}/auth/currentuser`);
     return data;
   }, []);
 

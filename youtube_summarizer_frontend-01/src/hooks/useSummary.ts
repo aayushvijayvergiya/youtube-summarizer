@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
-import { API_BASE_URL } from "@/constants/api-constants";
-import { getAuthToken } from '@/utils/auth';
+import { apiService } from '@/service/apiService';
 
 interface Summary {
     id: number;
@@ -37,26 +37,13 @@ export function useSummary(): UseSummaryResult {
     const [error, setError] = useState<string | null>(null);
 
     const fetchSummaries = useCallback(async () => {
-        const token = await getAuthToken();
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/summary/history`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch summaries');
-            }
-            const data = await response.json();
+            const data = await apiService.get<{ histories: Summary[] }>("/summary/history");
             setSummaries(Array.isArray(data.histories) ? data.histories : []);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Unknown error');
-            }
+        } catch (err: any) {
+            setError(err.message || 'Unknown error');
             setSummaries([]);
         } finally {
             setLoading(false);
@@ -65,32 +52,19 @@ export function useSummary(): UseSummaryResult {
 
     const summarizeVideo = useCallback(
         async (videoUrl: string, format: string = "paragraph") : Promise<SummarizeResponse> => {
-            const token = await getAuthToken();
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${API_BASE_URL}/summary/youtube`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
+                const data = await apiService.post<SummarizeResponse>(
+                    "/summary/youtube",
+                    {
                         url: videoUrl,
                         format_type: format || "paragraph",
-                    }),
-                });
-                const data: SummarizeResponse = await response.json();
-                if (!response.ok) {
-                    throw new Error((data as { detail?: string })?.detail || "Failed to summarize video");
-                }
+                    }
+                );
                 return data;
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Unknown error");
-                }
+            } catch (err: any) {
+                setError(err.message || "Unknown error");
                 throw err;
             } finally {
                 setLoading(false);
@@ -101,36 +75,17 @@ export function useSummary(): UseSummaryResult {
 
     const saveSummary = useCallback(
         async ({ summary, title, url }: SaveSummaryRequest) => {
-            const token = await getAuthToken();
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${API_BASE_URL}/summary/save`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        summary,
-                        title,
-                        url,
-                    }),
-                });
-                if (!response.ok) {
-                    throw new Error("Failed to save summary");
-                }
+                await apiService.post("/summary/save", { summary, title, url });
                 await fetchSummaries();
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Unknown error");
-                }
+            } catch (err: any) {
+                setError(err.message || "Unknown error");
             } finally {
                 setLoading(false);
             }
-        }, [])
+        }, [fetchSummaries])
 
     return { 
         summaries, 

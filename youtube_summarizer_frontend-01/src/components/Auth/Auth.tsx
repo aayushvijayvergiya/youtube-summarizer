@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, /* useEffect */ } from "react";
-import axios from "axios";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/constants/api-constants";
 import { useAuthContext } from "@/context/AuthContext";
-
-const API_URL = API_BASE_URL || "http://localhost:8010";
+import { apiService } from "@/service/apiService";
 
 interface FormData {
   name: string;
@@ -40,26 +37,29 @@ export default function AuthForm() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       if (isSignup) {
-        await axios.post(`${API_URL}/auth/signup`, {
+        await apiService.post("/auth/signup", {
           username: data.username,
           email: data.email,
           password: data.password,
+          name: data.name,
         });
         toast.success("Signup successful! Please signin.");
         toggleMode();
       } else {
-        const res = await axios.post(`${API_URL}/auth/signin`, {
-          username: data.username,
-          password: data.password,
-        });
+        const res = await apiService.post<{ access_token: string }>(
+          "/auth/signin",
+          {
+            username: data.username,
+            password: data.password,
+          }
+        );
         toast.success("Signin successful!");
-        await login(res.data.access_token); // Update the context with the token
-        // Redirect to dashboard or home page
+        await login(res.access_token); // Update the context with the token
         router.push("/summary");
       }
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data?.detail || "An error occurred");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError((err as Error).message || "An error occurred");
       } else {
         setError("An unexpected error occurred");
       }
@@ -132,7 +132,10 @@ export default function AuthForm() {
         </button>
       </form>
       <div className="text-center mt-4">
-        <button onClick={toggleMode} className="text-blue-500 underline cursor-pointer">
+        <button
+          onClick={toggleMode}
+          className="text-blue-500 underline cursor-pointer"
+        >
           {isSignup
             ? "Already have an account? Signin"
             : "Don't have an account? Signup"}

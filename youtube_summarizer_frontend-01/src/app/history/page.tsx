@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSummary } from "@/hooks/useSummary";
 
 import SummaryCard from "@/components/SummaryCard/SummaryCard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Summary {
   id: number;
@@ -31,7 +32,7 @@ const History = () => {
     }
   }, [summariesFromResponse]);
   return (
-    <>
+    <ProtectedRoute>
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
         <h1 className="text-3xl font-bold mb-4">History</h1>
         <p className="text-lg text-gray-600 mb-8">
@@ -49,7 +50,7 @@ const History = () => {
           ))}
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   );
 };
 

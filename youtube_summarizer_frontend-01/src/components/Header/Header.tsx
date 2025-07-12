@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuthContext } from "@/context/AuthContext";
+import { AuthStatus, useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const {
-    state: { isAuthenticated },
+    state: { status },
     logout,
   } = useAuthContext();
   const router = useRouter();
 
   const handleAuthClick = () => {
-    if (isAuthenticated) {
+    if (status === AuthStatus.AUTHENTICATED) {
       logout();
       router.push("/auth");
     } else {
@@ -57,7 +57,7 @@ const Header: React.FC = () => {
             >
               New Summary
             </Link>
-            {isAuthenticated && (
+            {status === AuthStatus.AUTHENTICATED && (
               <Link
                 href="/history"
                 className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium"
@@ -69,7 +69,7 @@ const Header: React.FC = () => {
               onClick={handleAuthClick}
               className="text-white hover:text-indigo-100 px-3 py-2 rounded-md text-sm font-medium focus:outline-none cursor-pointer"
             >
-              {isAuthenticated ? "Sign Out" : "Sign In"}
+              {status === AuthStatus.AUTHENTICATED ? "Sign Out" : "Sign In"}
             </button>
             <Link
               href="/about"
@@ -146,7 +146,7 @@ const Header: React.FC = () => {
               }}
               className="text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium text-left focus:outline-none"
             >
-              {isAuthenticated ? "Sign Out" : "Sign In"}
+              {status === AuthStatus.AUTHENTICATED ? "Sign Out" : "Sign In"}
             </button>
             <Link
               href="/about"
