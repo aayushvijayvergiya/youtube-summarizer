@@ -12,8 +12,7 @@ def save_summary(db: Session, summary):
         summaries.title = summary['title']
         summaries.summary = summary['summary']
         summaries.summary_metadata = models.SummaryMetadata()
-        summaries.summary_metadata.key = summary['metadata']['key']
-        summaries.summary_metadata.value = summary['metadata']['value']
+        summaries.summary_metadata.url = summary['metadata']['url']
         db.add(summaries)
         db.commit()
         db.refresh(summaries)

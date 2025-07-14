@@ -50,10 +50,9 @@ def save_summary_history(
     saved_summary = save_summary(db, {
         "title": summary_request.title,
         "summary": summary_request.summary,
-        "metadata": {
-            "key": "url",
-            "value": summary_request.url
-        }
+        "metadata": [{
+            "url": summary_request.url
+        }]
     })
     return SummarySaveResponse(
         message=f"Summary saved for {summary_request.url}"
@@ -67,8 +66,9 @@ def get_saved_histories(db: Session = Depends(database.get_db)):
     mapped_summaries = list(map(lambda x: {
         "id": x.id,
         "title": x.title,
-        "url": x.summary_metadata.value,
-        "summary": x.summary
+        "url": x.summary_metadata.url,
+        "summary": x.summary,
+        "createdAt": x.summary_metadata.createdAt.strftime("%Y-%m-%d %H:%M:%S")
     }, summaries))
 
     print(f"Retrieved summaries: {mapped_summaries[0]['summary']} - {mapped_summaries[0]['title']} - {mapped_summaries[0]['url']}")
@@ -85,7 +85,8 @@ def get_summary_by_id(history_id: int, db: Session = Depends(database.get_db)):
         "id": x.id,
         "title": x.title,
         "url": x.summary_metadata.value,
-        "summary": x.summary
+        "summary": x.summary,
+        "createdAt": x.summary_metadata.createdAt.strftime("%Y-%m-%d %H:%M:%S")
     }, summaries))
 
     print(f"Retrieved summaries: {mapped_summaries[0]['summary']} - {mapped_summaries[0]['title']} - {mapped_summaries[0]['url']}")

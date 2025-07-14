@@ -16,6 +16,7 @@ class SummaryResponse(BaseModel):
     url: str
     title: str
     summary: str
+    createdAt: str
     word_count: int
 
 
@@ -35,8 +36,8 @@ class SummaryMetadata(Base):
     __tablename__ = "metadata"
 
     id = Column(Integer, primary_key=True, index=True)
-    key = Column(String, index=True)
-    value = Column(String, index=True)
+    url = Column(String, index=True)
+    createdAt = Column(DateTime, default=datetime.now, index=True)
 
 class Summary(Base):
     __tablename__ = "summaries"
@@ -44,6 +45,5 @@ class Summary(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     summary = Column(String, index=True)
-    createdAt = Column(DateTime, default=datetime.now, index=True)
     summary_metadata_id = Column(Integer, ForeignKey("metadata.id"))
     summary_metadata = relationship("SummaryMetadata")
