@@ -10,6 +10,7 @@ interface Summary {
   title: string;
   url: string;
   summary: string;
+  createdAt: string;
 }
 
 const History = () => {
@@ -45,7 +46,7 @@ const History = () => {
               id={summary.id.toString()}
               title={summary.title}
               url={summary.url}
-              createdAt={"2023-10-01T12:00:00Z"} // Placeholder date, replace with actual date if available
+              createdAt={summary.createdAt || "2023-10-01T12:00:00Z"} // Placeholder date, replace with actual date if available
             />
           ))}
         </div>
