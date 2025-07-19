@@ -46,7 +46,7 @@ const History = () => {
               id={summary.id.toString()}
               title={summary.title}
               url={summary.url}
-              createdAt={summary.createdAt || "2023-10-01T12:00:00Z"} // Placeholder date, replace with actual date if available
+              createdAt={new Date(summary.createdAt).toDateString()}
             />
           ))}
         </div>

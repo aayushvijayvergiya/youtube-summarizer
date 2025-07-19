@@ -1,6 +1,4 @@
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.proxies import WebshareProxyConfig
-from youtube_transcript_api.formatters import TextFormatter
 from urllib.parse import urlparse, parse_qs
 
 
@@ -21,37 +19,38 @@ def get_youtube_transcript(youtube_url: str) -> str:
         # Extract video ID from URL
         video_id = extract_video_id(youtube_url)
 
-        ytt_api = YouTubeTranscriptApi(
-            proxy_config=WebshareProxyConfig(
-                proxy_username="aayushwebshare01",
-                proxy_password="3nuecv7s5qhr",
-            )
-        )
+        print(f"Extracted video ID: {video_id}")
 
-        # Get available transcripts
-        transcript_list = ytt_api.list(video_id)
+        # Get available transcripts (without proxy)
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
 
         # Try to get English transcript
         try:
             transcript = transcript_list.find_transcript(['en'])
         except:
             # If English not available, get whatever is available and translate
-            transcript = transcript_list.find_transcript(['en-US', 'en-GB'])
-            if not transcript:
-                transcript = transcript_list.find_generated_transcript(['en'])
-                if not transcript:
+            try:
+                transcript = transcript_list.find_transcript(['en-US', 'en-GB'])
+            except:
+                try:
+                    transcript = transcript_list.find_generated_transcript(['en'])
+                except:
                     # Get any available transcript and translate to English
-                    transcript = transcript_list.find_generated_transcript()
-                    transcript = transcript.translate('en')
+                    available_transcripts = list(transcript_list)
+                    if available_transcripts:
+                        transcript = available_transcripts[0].translate('en')
+                    else:
+                        raise ValueError("No transcripts available for this video")
 
         # Get the transcript data
         transcript_data = transcript.fetch()
 
         # Format the transcript as plain text
-        formatter = TextFormatter()
-        formatted_transcript = formatter.format_transcript(transcript_data)
+        formatted_transcript = ""
+        for entry in transcript_data:
+            formatted_transcript += entry['text'] + " "
 
-        return formatted_transcript
+        return formatted_transcript.strip()
 
     except Exception as e:
         raise ValueError(f"Failed to retrieve transcript: {str(e)}")
@@ -72,6 +71,8 @@ def extract_video_id(youtube_url: str) -> str:
     """
     # Handle different URL formats
     parsed_url = urlparse(youtube_url)
+
+    print(f'Parsed URL: {parsed_url}')
 
     # Format: youtube.com/watch?v=VIDEO_ID
     if parsed_url.netloc in ('youtube.com', 'www.youtube.com') and parsed_url.path == '/watch':

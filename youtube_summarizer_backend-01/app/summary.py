@@ -5,7 +5,7 @@ from app import database
 from app.summaryRepository.models import SummaryResponse, VideoRequest, SummarySaveResponse, SummarySaveRequest, \
     SummaryHistoryResponse
 from app.summaryRepository.repository import save_summary, get_histories, get_history_by_id
-from app.summaryRepository.youtube_transcript import get_youtube_transcript
+from app.summaryRepository.youtube_transcript_v2 import get_youtube_transcript_v2, get_video_info_ytdlp
 from app.summaryRepository.summarize_transcript import summarize_transcript
 
 router = APIRouter()
@@ -25,18 +25,31 @@ def generate_youtube_summary(
         # Call your summarizer function here
         url = validate_url(video_request.url)
         print(f'Received request: {url}')
-        transcript = get_youtube_transcript(youtube_url=url)
-        summary = summarize_transcript(transcript=transcript, max_tokens=video_request.max_length)["summary"]
+        
+        # Get video information (title, etc.)
+        video_info = get_video_info_ytdlp(url)
+        video_title = video_info.get('title', 'YouTube Video')
+        
+        # Get transcript using the improved method
+        transcript = get_youtube_transcript_v2(youtube_url=url)
+        
+        # Generate summary with format type from request
+        summary_result = summarize_transcript(
+            transcript=transcript, 
+            max_tokens=video_request.max_length,
+            format_type=video_request.format_type
+        )
+        summary = summary_result["summary"]
 
         return SummaryResponse(
             url=url,
-            title=f"Video Title Placeholder",  # Replace with actual title if available
-            summary=f'This is a summary of the video at {video_request.url} : {summary}',
+            title=video_title,
+            summary=summary,
             word_count=len(summary.split())
         )
     except Exception as e:
         print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Error summarizing video")
+        raise HTTPException(status_code=500, detail=f"Error summarizing video: {str(e)}")
 
 
 @router.post("/save", response_model=SummarySaveResponse)
@@ -50,9 +63,9 @@ def save_summary_history(
     saved_summary = save_summary(db, {
         "title": summary_request.title,
         "summary": summary_request.summary,
-        "metadata": [{
+        "metadata": {
             "url": summary_request.url
-        }]
+        }
     })
     return SummarySaveResponse(
         message=f"Summary saved for {summary_request.url}"

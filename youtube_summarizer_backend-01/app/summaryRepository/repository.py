@@ -6,7 +6,7 @@ def save_summary(db: Session, summary):
     """
     Save the summary to summary table.
     """
-    print(f"Saving summary: {summary['title']} - {summary['summary']} - {summary['metadata']['key']} - {summary['metadata']['value']}")
+    print(f"Saving summary: {summary['title']} - {summary['summary']} - {summary['metadata']['url']}")
     try:
         summaries = models.Summary()
         summaries.title = summary['title']

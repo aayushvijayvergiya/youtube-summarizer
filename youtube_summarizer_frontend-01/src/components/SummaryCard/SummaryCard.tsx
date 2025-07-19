@@ -12,7 +12,7 @@ export default function SummaryCard({ id, title, createdAt, url }: SummaryCardPr
     <Link href={`/summary/${id}`}>
       <div className="border rounded-xl p-4 hover:shadow-md transition">
         <h3 className="font-semibold text-xl">{title}</h3>
-        <p className="text-gray-500 text-sm">{new Date(createdAt).toLocaleString()}</p>
+        <p className="text-gray-500 text-sm">{new Date(createdAt).toDateString()}</p>
         <p className="text-gray-700 mt-2">{url}</p>
       </div>
     </Link>

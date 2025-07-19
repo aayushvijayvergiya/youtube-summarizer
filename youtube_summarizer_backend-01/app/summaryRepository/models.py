@@ -10,13 +10,13 @@ from typing import Any
 class VideoRequest(BaseModel):
     url: str
     max_length: int = 300
+    format_type: str = "paragraph"  # "paragraph", "bullet", or "detailed"
 
 
 class SummaryResponse(BaseModel):
     url: str
     title: str
     summary: str
-    createdAt: str
     word_count: int
 
 
